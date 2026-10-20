@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Control de ingresos, gastos, deudas y caja de PAPE BARBERIA.">
+<meta name="application-name" content="PAPE BARBERIA">
+<meta name="theme-color" content="#111111">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<title>PAPE BARBERIA | Control de negocio</title>
+<style>
+:root{--bg:#0b1020;--panel:#121a2d;--panel2:#182238;--text:#f3f4f6;--muted:#9ca3af;--line:#2b3852;--gold:#d6a84f;--green:#34d399;--red:#fb7185;--blue:#7dd3fc}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#090d18,#10192b);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--text)}
+header{padding:18px max(16px,calc((100% - 1150px)/2));border-bottom:1px solid var(--line);background:#0b1020e8;position:sticky;top:0;z-index:5;backdrop-filter:blur(12px)}
+.brand{display:flex;align-items:center;gap:12px}.icon{width:46px;height:46px;border-radius:14px;background:var(--gold);color:#111827;display:grid;place-items:center;font-size:24px;font-weight:900}
+h1{font-size:20px;margin:0}header p{margin:3px 0 0;color:var(--muted);font-size:13px}
+main{max-width:1150px;margin:auto;padding:22px 16px 60px}.tabs{display:flex;gap:8px;overflow:auto;margin-bottom:20px;padding-bottom:4px}
+button,.btn{border:0;border-radius:10px;padding:11px 14px;font-weight:700;cursor:pointer;background:var(--panel2);color:var(--text);white-space:nowrap}
+button.active,.primary{background:var(--gold);color:#151515}.danger{background:#51202d;color:#fecdd3}.soft{border:1px solid var(--line);background:transparent}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.card{background:linear-gradient(145deg,var(--panel),#111827);border:1px solid var(--line);border-radius:16px;padding:17px;min-width:0}
+.metric .label{color:var(--muted);font-size:13px}.metric .value{font-size:clamp(20px,3vw,29px);font-weight:800;margin-top:8px;overflow-wrap:anywhere}.metric small{color:var(--muted)}
+.section{margin-top:20px}.section h2{font-size:17px;margin:0 0 12px}.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}input,select,textarea{width:100%;background:#0b1221;border:1px solid var(--line);border-radius:9px;padding:11px;color:var(--text);font:inherit;min-width:0}textarea{resize:vertical;min-height:42px}.full{grid-column:1/-1}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:12px}table{border-collapse:collapse;width:100%;min-width:650px}th,td{padding:11px 12px;text-align:left;border-bottom:1px solid var(--line);font-size:13px}th{color:var(--muted);background:#0d1424;font-weight:700}tr:last-child td{border-bottom:0}.empty{text-align:center;color:var(--muted);padding:25px}
+.pill{display:inline-block;padding:4px 8px;border-radius:20px;background:#263247;font-size:11px}.pill.ok{color:#a7f3d0;background:#12372f}.pill.warn{color:#fde68a;background:#473715}.pill.bad{color:#fecdd3;background:#4b1d2a}
+.notice{color:var(--muted);font-size:12px;line-height:1.5}.hidden{display:none!important}.split{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.chartbars{display:flex;align-items:end;gap:8px;height:145px;padding-top:12px}.barcol{flex:1;min-width:20px;text-align:center}.bar{border-radius:6px 6px 2px 2px;background:var(--gold);min-height:3px}.barcol small{display:block;color:var(--muted);font-size:10px;margin-top:7px}.barcol em{display:block;font-style:normal;font-size:10px;color:var(--muted);margin-bottom:4px}
+@media(max-width:800px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.row{grid-template-columns:1fr}}
+@media(max-width:430px){header{padding:16px}.grid{gap:8px}.card{padding:13px}.metric .value{font-size:22px}main{padding:16px 10px 40px}button{padding:10px 12px}}
+</style>
+</head>
+<body>
+<header>
+<div class="brand"><div class="icon">♛</div><div><h1 id="businessTitle">PAPE BARBERIA</h1><p>Control de ingresos, gastos, deudas y caja</p></div></div>
+</header>
+<main>
+<div class="split" style="margin-bottom:15px"><div><div style="font-size:13px;color:var(--muted)">Tu negocio, en orden</div><div style="font-size:22px;font-weight:800">Panel de control</div></div><button class="soft" onclick="editBusiness()">⚙ Configurar barbería</button></div>
+<nav class="tabs">
+<button class="active" data-tab="inicio">📊 Resumen</button><button data-tab="ingresos">＋ Ingresos</button><button data-tab="gastos">− Gastos</button><button data-tab="deudas">📌 Deudas</button><button data-tab="servicios">✂ Servicios</button><button data-tab="reportes">📈 Reportes y respaldo</button>
+</nav>
+<section id="inicio" class="page">
+<div class="grid">
+<div class="card metric"><div class="label">Ingresos del mes</div><div class="value" id="mIncome">$0</div><small>Ventas y servicios cobrados</small></div>
+<div class="card metric"><div class="label">Gastos pagados del mes</div><div class="value" id="mExpenses">$0</div><small>Salidas registradas</small></div>
+<div class="card metric"><div class="label">Resultado del mes</div><div class="value" id="mProfit">$0</div><small>Ingresos − gastos pagados</small></div>
+<div class="card metric"><div class="label">Deuda pendiente</div><div class="value" id="debtTotal">$0</div><small id="debtCount">0 deudas activas</small></div>
+<div class="card metric"><div class="label">Ingresos de hoy</div><div class="value" id="todayIncome">$0</div></div>
+<div class="card metric"><div class="label">Gastos de hoy</div><div class="value" id="todayExpense">$0</div></div>
+<div class="card metric"><div class="label">Saldo de caja estimado</div><div class="value" id="cashBalance">$0</div><small>Efectivo inicial + efectivo recibido − salidas en efectivo</small></div>
+<div class="card metric"><div class="label">Próximo vencimiento</div><div class="value" id="nextDue" style="font-size:18px">Sin pagos próximos</div><small id="nextDueSub"></small></div>
+</div>
+<div class="row section">
+<div class="card"><div class="split"><h2>Ingresos de los últimos 7 días</h2><span class="pill">MXN</span></div><div id="weekChart" class="chartbars"></div></div>
+<div class="card"><h2>Pagos próximos</h2><div id="upcoming"></div><p class="notice">Registra cada deuda con su nombre, monto total y fecha límite. Los abonos reducen el saldo pendiente.</p></div>
+</div>
+<div class="card section"><div class="split"><h2>Movimientos recientes</h2><button class="soft" onclick="go('reportes')">Ver reportes</button></div><div id="recent"></div></div>
+</section>
+
+<section id="ingresos" class="page hidden">
+<div class="row">
+<div class="card"><h2>Registrar ingreso</h2><form id="incomeForm">
+<div><label>Fecha</label><input type="date" name="date" required></div><div><label>Servicio</label><select name="service" id="incomeService"></select></div>
+<div><label>Importe cobrado ($)</label><input type="number" name="amount" min="0.01" step=".01" required placeholder="100"></div><div><label>Método de pago</label><select name="method"><option>Efectivo</option><option>Transferencia</option><option>Tarjeta</option><option>Otro</option></select></div>
+<div><label>Cliente (opcional)</label><input name="client" placeholder="Nombre o apodo"></div><div><label>Quién realizó el servicio</label><input name="barber" placeholder="Ej. Jasiel"></div>
+<div class="full"><label>Notas</label><input name="notes" placeholder="Promoción, propina, etc."></div>
+<div class="full"><button class="primary" type="submit">Guardar ingreso</button></div></form></div>
+<div class="card"><h2>Historial de ingresos</h2><p class="notice">Puedes registrar cortes, propinas, venta de productos u otros ingresos. Usa el campo de servicio para distinguirlos.</p><div id="incomeTable"></div></div>
+</div></section>
+
+<section id="gastos" class="page hidden">
+<div class="row">
+<div class="card"><h2>Registrar gasto</h2><form id="expenseForm">
+<div><label>Fecha</label><input type="date" name="date" required></div><div><label>Categoría</label><select name="category"><option>Renta</option><option>Agua, luz e internet</option><option>Productos e insumos</option><option>Herramientas y mantenimiento</option><option>Publicidad</option><option>Comisiones o sueldos</option><option>Impuestos y trámites</option><option>Pago de deuda</option><option>Personal</option><option>Otro</option></select></div>
+<div class="full"><label>Concepto / ¿En qué gastaste?</label><input name="concept" required placeholder="Ej. navajas, talco, luz, renta"></div>
+<div><label>Importe ($)</label><input name="amount" type="number" min=".01" step=".01" required></div><div><label>Pagado desde</label><select name="method"><option>Efectivo</option><option>Transferencia</option><option>Tarjeta</option><option>Otro</option></select></div>
+<div class="full"><label>Notas (opcional)</label><input name="notes"></div><div class="full"><button class="primary">Guardar gasto</button></div></form></div>
+<div class="card"><h2>Historial de gastos</h2><div id="expenseTable"></div></div>
+</div></section>
+
+<section id="deudas" class="page hidden">
+<div class="row">
+<div class="card"><h2>Agregar deuda o pago pendiente</h2><form id="debtForm">
+<div><label>Nombre de la deuda</label><input name="name" required placeholder="Ej. Renta del local, préstamo, silla"></div><div><label>A quién le debo</label><input name="creditor" placeholder="Persona o empresa"></div>
+<div><label>Monto total ($)</label><input name="total" type="number" min=".01" step=".01" required></div><div><label>Fecha límite</label><input name="due" type="date"></div>
+<div><label>Frecuencia de pago</label><select name="frequency"><option>Único</option><option>Semanal</option><option>Quincenal</option><option>Mensual</option><option>Personalizado</option></select></div><div><label>Pago programado ($)</label><input name="scheduled" type="number" min="0" step=".01" placeholder="Opcional"></div>
+<div><label>Prioridad</label><select name="priority"><option>Normal</option><option>Alta</option><option>Urgente</option></select></div><div><label>Notas / referencia</label><input name="notes" placeholder="Contrato, número de pago, etc."></div>
+<div class="full"><button class="primary">Guardar deuda</button></div></form></div>
+<div class="card"><h2>Deudas registradas</h2><p class="notice">Abona cuando pagues una parte. El saldo se actualiza automáticamente; puedes consultar el historial de abonos.</p><div id="debtTable"></div></div>
+</div>
+<div class="card section"><h2>Historial de abonos</h2><div id="paymentTable"></div></div>
+</section>
+
+<section id="servicios" class="page hidden">
+<div class="row">
+<div class="card"><h2>Agregar servicio o producto</h2><form id="serviceForm"><div class="full"><label>Nombre</label><input name="name" required placeholder="Ej. Corte clásico"></div><div><label>Precio sugerido ($)</label><input name="price" type="number" min="0" step=".01" required></div><div><label>Tipo</label><select name="type"><option>Servicio</option><option>Producto</option><option>Otro ingreso</option></select></div><div class="full"><button class="primary">Agregar a catálogo</button></div></form></div>
+<div class="card"><h2>Catálogo editable</h2><div id="serviceTable"></div><p class="notice">El precio es una sugerencia para registrar más rápido. Puedes cambiar el importe al guardar cada ingreso.</p></div>
+</div></section>
+
+<section id="reportes" class="page hidden">
+<div class="grid">
+<div class="card metric"><div class="label">Total de ingresos registrados</div><div class="value" id="allIncome">$0</div></div><div class="card metric"><div class="label">Total de gastos registrados</div><div class="value" id="allExpense">$0</div></div><div class="card metric"><div class="label">Total abonado a deudas</div><div class="value" id="allPaid">$0</div></div><div class="card metric"><div class="label">Saldo pendiente total</div><div class="value" id="allDebt">$0</div></div>
+</div>
+<div class="row section"><div class="card"><h2>Filtrar movimientos</h2><form id="filterForm"><div><label>Desde</label><input type="date" name="from"></div><div><label>Hasta</label><input type="date" name="to"></div><div class="full"><button class="primary">Aplicar filtro</button> <button type="button" class="soft" onclick="clearFilter()">Limpiar</button></div></form><p class="notice">El filtro aplica a ingresos y gastos. Los reportes son administrativos y no sustituyen la contabilidad fiscal.</p></div>
+<div class="card"><h2>Exportar y respaldo</h2><p class="notice">Descarga una copia de tus registros para guardarla. El archivo JSON permite restaurar los datos en este mismo navegador o en otro dispositivo.</p><div class="actions"><button class="primary" onclick="exportCSV()">Descargar reporte CSV</button><button onclick="backup()">Crear respaldo JSON</button><label class="btn soft" style="display:inline-flex;align-items:center">Restaurar respaldo<input id="restoreFile" type="file" accept=".json,application/json" style="display:none"></label></div><div class="actions"><button class="danger" onclick="clearAll()">Borrar todos los datos</button></div></div></div>
+<div class="card section"><h2>Detalle del periodo</h2><div id="reportTable"></div></div>
+</section>
+<p class="notice section">Privacidad: esta versión guarda los datos en el almacenamiento del navegador de este dispositivo. No borres los datos del navegador sin descargar antes un respaldo. No es una cuenta bancaria ni se sincroniza automáticamente con otros dispositivos.</p>
+</main>
+<script>
+const KEY='barberia_control_v1';
+const today=()=>new Date().toLocaleDateString('en-CA');
+const money=n=>new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN'}).format(Number(n)||0);
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+let data={business:'PAPE BARBERIA',openingCash:0,incomes:[],expenses:[],debts:[],payments:[],services:[
+{name:'Corte clásico',price:100,type:'Servicio'},{name:'Corte con diseño',price:120,type:'Servicio'},{name:'Corte y barba',price:150,type:'Servicio'},{name:'Barba',price:60,type:'Servicio'},{name:'Corte infantil',price:100,type:'Servicio'},{name:'Venta de producto',price:0,type:'Producto'},{name:'Otro ingreso',price:0,type:'Otro ingreso'}]};
+let filter={from:'',to:''};
+function load(){try{const x=JSON.parse(localStorage.getItem(KEY));if(x)data={...data,...x}}catch(e){}}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render()}
+function sum(arr){return arr.reduce((a,x)=>a+Number(x.amount||0),0)}
+function monthKey(d){return (d||'').slice(0,7)}
+function within(d){return (!filter.from||d>=filter.from)&&(!filter.to||d<=filter.to)}
+function setDefaults(){document.querySelectorAll('input[name="date"]').forEach(x=>x.value=today())}
+function go(id){document.querySelectorAll('.page').forEach(x=>x.classList.toggle('hidden',x.id!==id));document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x.dataset.tab===id));window.scrollTo({top:0,behavior:'smooth'});render()}
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>go(b.dataset.tab));
+function table(headers,rows){if(!rows.length)return '<div class="empty">Todavía no hay registros.</div>';return '<div class="tablewrap"><table><thead><tr>'+headers.map(x=>'<th>'+x+'</th>').join('')+'</tr></thead><tbody>'+rows.join('')+'</tbody></table></div>'}
+function delButton(type,id){return `<button class="danger" style="padding:6px 8px" onclick="removeItem('${type}','${id}')">Eliminar</button>`}
+function render(){
+document.getElementById('businessTitle').textContent=data.business||'Mi Barbería';
+const m=today().slice(0,7), incM=data.incomes.filter(x=>monthKey(x.date)===m), expM=data.expenses.filter(x=>monthKey(x.date)===m);
+const incomeM=sum(incM),expenseM=sum(expM), debtOpen=data.debts.reduce((a,d)=>a+Math.max(0,Number(d.total)-data.payments.filter(p=>p.debtId===d.id).reduce((s,p)=>s+Number(p.amount),0)),0);
+const todayI=sum(data.incomes.filter(x=>x.date===today())),todayE=sum(data.expenses.filter(x=>x.date===today()));
+const cashIn=sum(data.incomes.filter(x=>x.method==='Efectivo')),cashOut=sum(data.expenses.filter(x=>x.method==='Efectivo'))+sum(data.payments.filter(x=>x.method==='Efectivo'));
+[['mIncome',incomeM],['mExpenses',expenseM],['mProfit',incomeM-expenseM],['debtTotal',debtOpen],['todayIncome',todayI],['todayExpense',todayE],['cashBalance',Number(data.openingCash||0)+cashIn-cashOut],['allIncome',sum(data.incomes)],['allExpense',sum(data.expenses)],['allPaid',sum(data.payments)],['allDebt',debtOpen]].forEach(([id,v])=>document.getElementById(id).textContent=money(v));
+document.getElementById('debtCount').textContent=data.debts.filter(d=>debtBalance(d)>0).length+' deudas activas';
+const upcoming=data.debts.filter(d=>debtBalance(d)>0&&d.due).sort((a,b)=>a.due.localeCompare(b.due));
+document.getElementById('nextDue').textContent=upcoming.length?new Date(upcoming[0].due+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short'}):'Sin pagos próximos';
+document.getElementById('nextDueSub').textContent=upcoming.length?upcoming[0].name+' · '+money(debtBalance(upcoming[0])):'Agrega fecha límite a tus deudas';
+document.getElementById('upcoming').innerHTML=upcoming.length?upcoming.slice(0,5).map(d=>`<div style="padding:10px 0;border-bottom:1px solid var(--line)"><div class="split"><b>${esc(d.name)}</b><span class="pill ${d.priority==='Urgente'?'bad':d.priority==='Alta'?'warn':''}">${esc(d.priority)}</span></div><div class="notice">Vence: ${d.due} · Pendiente: <b>${money(debtBalance(d))}</b></div></div>`).join(''):'<div class="empty">No hay pagos próximos registrados.</div>';
+const days=[];for(let i=6;i>=0;i--){let dt=new Date();dt.setDate(dt.getDate()-i);let k=dt.toLocaleDateString('en-CA');days.push({k,label:dt.toLocaleDateString('es-MX',{weekday:'short'}),val:sum(data.incomes.filter(x=>x.date===k))})}
+const max=Math.max(1,...days.map(d=>d.val));document.getElementById('weekChart').innerHTML=days.map(d=>`<div class="barcol"><em>${d.val?money(d.val).replace('MXN','').trim():' '}</em><div class="bar" style="height:${Math.max(3,d.val/max*95)}px"></div><small>${d.label}</small></div>`).join('');
+const recent=[...data.incomes.map(x=>({...x,kind:'Ingreso',label:x.service})),...data.expenses.map(x=>({...x,kind:'Gasto',label:x.concept}))].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,6);
+document.getElementById('recent').innerHTML=table(['Fecha','Tipo','Concepto','Importe'],recent.map(x=>`<tr><td>${x.date}</td><td><span class="pill ${x.kind==='Ingreso'?'ok':'bad'}">${x.kind}</span></td><td>${esc(x.label)}</td><td>${money(x.amount)}</td></tr>`));
+document.getElementById('incomeTable').innerHTML=table(['Fecha','Servicio','Cliente','Pago','Importe',''],data.incomes.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(x=>`<tr><td>${x.date}</td><td>${esc(x.service)}</td><td>${esc(x.client||'—')}</td><td>${esc(x.method)}</td><td>${money(x.amount)}</td><td>${delButton('income',x.id)}</td></tr>`));
+document.getElementById('expenseTable').innerHTML=table(['Fecha','Categoría','Concepto','Pago','Importe',''],data.expenses.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(x=>`<tr><td>${x.date}</td><td>${esc(x.category)}</td><td>${esc(x.concept)}</td><td>${esc(x.method)}</td><td>${money(x.amount)}</td><td>${delButton('expense',x.id)}</td></tr>`));
+document.getElementById('debtTable').innerHTML=table(['Deuda','A quién','Vence','Total','Abonado','Pendiente','Acción'],data.debts.map(d=>{let paid=paidFor(d.id);return `<tr><td><b>${esc(d.name)}</b><br><small>${esc(d.frequency)} · ${esc(d.priority)}</small></td><td>${esc(d.creditor||'—')}</td><td>${d.due||'—'}</td><td>${money(d.total)}</td><td>${money(paid)}</td><td><b>${money(debtBalance(d))}</b></td><td>${debtBalance(d)>0?`<button class="primary" style="padding:6px 8px" onclick="payDebt('${d.id}')">Abonar</button>`:''} ${delButton('debt',d.id)}</td></tr>`}));
+document.getElementById('paymentTable').innerHTML=table(['Fecha','Deuda','Importe','Nota',''],data.payments.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(p=>{let d=data.debts.find(d=>d.id===p.debtId);return `<tr><td>${p.date}</td><td>${esc(d?.name||'Deuda eliminada')}</td><td>${money(p.amount)}</td><td>${esc(p.note||'—')}</td><td>${delButton('payment',p.id)}</td></tr>`}));
+const s=document.getElementById('incomeService'),old=s.value;s.innerHTML=data.services.map(x=>`<option value="${esc(x.name)}">${esc(x.name)} — ${money(x.price)}</option>`).join('');if([...s.options].some(o=>o.value===old))s.value=old;
+document.getElementById('serviceTable').innerHTML=table(['Nombre','Tipo','Precio sugerido',''],data.services.map((x,i)=>`<tr><td>${esc(x.name)}</td><td>${esc(x.type)}</td><td>${money(x.price)}</td><td><button class="soft" style="padding:6px 8px" onclick="editService(${i})">Editar</button> ${delButton('service',x.name)}</td></tr>`));
+const filteredI=data.incomes.filter(x=>within(x.date)),filteredE=data.expenses.filter(x=>within(x.date));
+document.getElementById('reportTable').innerHTML=table(['Fecha','Tipo','Categoría / servicio','Método','Importe'],[...filteredI.map(x=>`<tr><td>${x.date}</td><td>Ingreso</td><td>${esc(x.service)}</td><td>${esc(x.method)}</td><td>${money(x.amount)}</td></tr>`),...filteredE.map(x=>`<tr><td>${x.date}</td><td>Gasto</td><td>${esc(x.category+' · '+x.concept)}</td><td>${esc(x.method)}</td><td>${money(x.amount)}</td></tr>`)].sort((a,b)=>b.localeCompare(a)));
+}
+function paidFor(id){return sum(data.payments.filter(p=>p.debtId===id))}
+function debtBalance(d){return Math.max(0,Number(d.total)-paidFor(d.id))}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function formObj(form){return Object.fromEntries(new FormData(form).entries())}
+document.getElementById('incomeForm').onsubmit=e=>{e.preventDefault();let x=formObj(e.target);x.id=uid();x.amount=Number(x.amount);data.incomes.push(x);e.target.reset();setDefaults();save();alert('Ingreso guardado.');};
+document.getElementById('expenseForm').onsubmit=e=>{e.preventDefault();let x=formObj(e.target);x.id=uid();x.amount=Number(x.amount);data.expenses.push(x);e.target.reset();setDefaults();save();alert('Gasto guardado.');};
+document.getElementById('debtForm').onsubmit=e=>{e.preventDefault();let x=formObj(e.target);x.id=uid();x.total=Number(x.total);x.scheduled=Number(x.scheduled||0);data.debts.push(x);e.target.reset();save();alert('Deuda guardada.');};
+document.getElementById('serviceForm').onsubmit=e=>{e.preventDefault();let x=formObj(e.target);x.price=Number(x.price);if(data.services.some(s=>s.name.toLowerCase()===x.name.toLowerCase()))return alert('Ya existe un servicio con ese nombre.');data.services.push(x);e.target.reset();save();alert('Servicio agregado.');};
+function removeItem(type,id){if(!confirm('¿Seguro que quieres eliminar este registro?'))return;if(type==='income')data.incomes=data.incomes.filter(x=>x.id!==id);if(type==='expense')data.expenses=data.expenses.filter(x=>x.id!==id);if(type==='debt'){data.debts=data.debts.filter(x=>x.id!==id);data.payments=data.payments.filter(x=>x.debtId!==id)}if(type==='payment')data.payments=data.payments.filter(x=>x.id!==id);if(type==='service')data.services=data.services.filter(x=>x.name!==id);save()}
+function payDebt(id){let d=data.debts.find(x=>x.id===id);let amt=prompt('Saldo pendiente: '+money(debtBalance(d))+'\\n¿Cuánto vas a abonar?');if(amt===null)return;amt=Number(amt);if(!amt||amt<=0)return alert('Escribe un importe válido.');if(amt>debtBalance(d))return alert('El abono no puede superar el saldo pendiente.');let date=prompt('Fecha del pago (AAAA-MM-DD)',today());if(!date)return;let method=prompt('Método de pago: escribe Efectivo, Transferencia, Tarjeta u Otro','Efectivo')||'Efectivo';let note=prompt('Nota del abono (opcional)','')||'';data.payments.push({id:uid(),debtId:id,amount:amt,date,note,method});save();alert('Abono registrado.')}
+function editService(i){let s=data.services[i],name=prompt('Nombre del servicio',s.name);if(!name)return;let price=prompt('Precio sugerido',s.price);if(price===null||isNaN(Number(price))||Number(price)<0)return alert('Precio no válido.');let type=prompt('Tipo (Servicio, Producto u Otro ingreso)',s.type)||s.type;s.name=name;s.price=Number(price);s.type=type;save()}
+function editBusiness(){let n=prompt('Nombre de tu barbería',data.business);if(n!==null&&n.trim())data.business=n.trim();let c=prompt('¿Con cuánto efectivo inicia normalmente tu caja? (MXN)',data.openingCash||0);if(c!==null&&!isNaN(Number(c))&&Number(c)>=0)data.openingCash=Number(c);save()}
+document.getElementById('filterForm').onsubmit=e=>{e.preventDefault();filter=formObj(e.target);render()};
+function clearFilter(){filter={from:'',to:''};document.getElementById('filterForm').reset();render()}
+function download(name,content,type){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type}));a.download=name;a.click();URL.revokeObjectURL(a.href)}
+function exportCSV(){let rows=[['Tipo','Fecha','Concepto','Categoría','Método','Importe','Cliente/Notas']];data.incomes.filter(x=>within(x.date)).forEach(x=>rows.push(['Ingreso',x.date,x.service,'',x.method,x.amount,(x.client||'')+' '+(x.notes||'')]));data.expenses.filter(x=>within(x.date)).forEach(x=>rows.push(['Gasto',x.date,x.concept,x.category,x.method,x.amount,x.notes||'']));data.payments.filter(x=>within(x.date)).forEach(x=>rows.push(['Abono deuda',x.date,data.debts.find(d=>d.id===x.debtId)?.name||'', '', x.method||'',x.amount,x.note||'']));let csv='\ufeff'+rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');download('reporte_barberia.csv',csv,'text/csv;charset=utf-8')}
+function backup(){download('respaldo_barberia_'+today()+'.json',JSON.stringify(data,null,2),'application/json')}
+document.getElementById('restoreFile').onchange=e=>{let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!x.incomes||!x.expenses||!x.debts)throw Error();if(confirm('Restaurar reemplazará los datos actuales. ¿Continuar?')){data=x;save();alert('Respaldo restaurado.')}}catch(err){alert('El archivo no parece ser un respaldo válido.')}e.target.value=''};r.readAsText(f)};
+function clearAll(){if(confirm('Esto borrará TODOS los ingresos, gastos, deudas y servicios guardados en este dispositivo. ¿Continuar?')&&confirm('Última confirmación: descarga un respaldo antes de borrar. ¿Borrar todo?')){localStorage.removeItem(KEY);location.reload()}}
+load();setDefaults();render();
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(err => console.warn('No se pudo registrar el modo offline:', err)));
+}
+</script>
+</body></html>
